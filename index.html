@@ -68,7 +68,7 @@
   <div class="ok" id="ok">✅ Request received! A local tech will reach out shortly.</div>
   <h2>Get a Local AC Tech in [CITY]</h2>
   <p class="lead">Free, no-obligation match. We connect you with available technicians — you pick the quote you like.</p>
-  <form id="leadForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+  <form id="leadForm" action="#" method="POST">
     <label for="name">Full Name</label>
     <input id="name" name="name" type="text" placeholder="Jane Doe" required />
     <label for="phone">Phone (best to reach you)</label>
@@ -120,8 +120,42 @@
 <script>
   document.getElementById('y').textContent = new Date().getFullYear();
   var f = document.getElementById('leadForm');
+  var TO = 'bill-hermes-agent@agentmail.to';
   f.addEventListener('submit', function(e){
-    setTimeout(function(){ document.getElementById('ok').style.display='block'; f.style.display='none'; }, 800);
+    e.preventDefault();
+    var d = {
+      name: document.getElementById('name').value,
+      phone: document.getElementById('phone').value,
+      email: document.getElementById('email').value,
+      zip: document.getElementById('zip').value,
+      issue: document.getElementById('issue').value,
+      urgency: document.getElementById('urgency').value
+    };
+    var subject = encodeURIComponent('[LEAD] AC Repair ' + d.zip + ' - ' + d.urgency);
+    var body = encodeURIComponent(
+      'New AC repair lead\n\n' +
+      'Name: ' + d.name + '\n' +
+      'Phone: ' + d.phone + '\n' +
+      'Email: ' + d.email + '\n' +
+      'ZIP: ' + d.zip + '\n' +
+      'Issue: ' + d.issue + '\n' +
+      'Urgency: ' + d.urgency + '\n'
+    );
+    var web3 = f.getAttribute('data-web3');
+    if (web3) {
+      var fd = new FormData();
+      fd.append('access_key', web3);
+      fd.append('subject', decodeURIComponent(subject));
+      fd.append('name', d.name); fd.append('phone', d.phone);
+      fd.append('email', d.email); fd.append('zip', d.zip);
+      fd.append('issue', d.issue); fd.append('urgency', d.urgency);
+      fetch('https://api.web3forms.com/submit', { method:'POST', body: fd });
+    }
+    var mail = 'mailto:' + TO + '?subject=' + subject + '&body=' + body;
+    var w = window.open('about:blank');
+    if (w) { w.location.href = mail; w.close(); } else { window.location.href = mail; }
+    document.getElementById('ok').style.display = 'block';
+    f.style.display = 'none';
   });
 </script>
 </body>
